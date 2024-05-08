@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+
+        
+        <div class="row">
+            <div class="card">
+                <div class="card-header">
+                    Forex Calculator
+                </div>
+                <div class="card-body">
+                  <form id="forex-form">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>From Date</label>
+                            <input type="date" name="from" id="from-txt" class="form-control"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label>To Date</label>
+                            <input type="date" name="to" id="to-txt" class="form-control"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Currency</label>
+                            <select name="currency" id="sel-curr" class="form-control">
+                                <option>Select Currency</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit"  class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+        </div>
+        <div class="row">
+            <table id="forex-table" class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Currency</th>
+                        <th>Buy</th>
+                        <th>Sale</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        
+
+        $(function(e){
+            preloadData();
+            $('#forex-form').on('submit',function(e){
+                e.preventDefault();
+                
+            });
+        });
+
+        function preloadData(){
+            $selCurr=$('#sel-curr');
+            let date=new Date();
+            let month=date.getMonth()+1;
+            month=(month<10)?`0${month}`:month;
+            let dd=date.getDate();
+            dd=(dd<10)?`0${dd}`:dd;
+            let from = to = `${date.getFullYear()}-${month}-${dd}`;
+            let url=`https://www.nrb.org.np/api/forex/v1/rates?per_page=100&page=1&from=${from}&to=${to}`;
+            fetch(url).then(function(resp){
+                        resp.json().then(function(json){
+                          if(json!==undefined){
+                            let forex=json.data.payload;
+                            $.each(forex,(index,row)=>{
+                                $selCurr.find('option').remove().append('<option>Select Currency</option>');
+                                $.each(row.rates,(i,r)=>{
+                                    $('<option/>').html(r.currency.name).appendTo($selCurr);
+                                });
+                            });
+                          } 
+                        });
+                });
+        }
+
+        
+    </script>
+</body>
+</html>
